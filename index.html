@@ -421,122 +421,272 @@
         const loanIncomeMultiple = (loanAmount / grossIncome).toFixed(2);
 
         return (
-          <div className="max-w-3xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
               Mortgage Calculator
             </h1>
 
-            <div className="slider-container">
-              <label htmlFor="purchase-price" className="slider-label">
-                Purchase Price: ${purchasePrice.toLocaleString()}
-              </label>
-              <input
-                type="range"
-                id="purchase-price"
-                min="100000"
-                max="1800000"
-                step="1000"
-                value={purchasePrice}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  setPurchasePrice(value);
-                  if (typeof localStorage !== "undefined") {
-                    localStorage.setItem(
-                      "mortgageCalc_purchasePrice",
-                      JSON.stringify(value)
-                    );
-                  }
-                }}
-              />
+            {/* Desktop 2-column layout, mobile 1-column layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Left column - Inputs */}
+              <div className="inputs-container">
+                <div className="slider-container">
+                  <label htmlFor="purchase-price" className="slider-label">
+                    Purchase Price
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-grow">
+                      <input
+                        type="range"
+                        id="purchase-price"
+                        min="100000"
+                        max="1800000"
+                        step="1000"
+                        value={purchasePrice}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          setPurchasePrice(value);
+                          if (typeof localStorage !== "undefined") {
+                            localStorage.setItem(
+                              "mortgageCalc_purchasePrice",
+                              JSON.stringify(value)
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="w-32">
+                      <input
+                        type="text"
+                        value={`$${purchasePrice.toLocaleString()}`}
+                        onChange={(e) => {
+                          const value = parseInt(
+                            e.target.value.replace(/[$,]/g, ""),
+                            10
+                          );
+                          if (!isNaN(value)) {
+                            setPurchasePrice(value);
+                            if (typeof localStorage !== "undefined") {
+                              localStorage.setItem(
+                                "mortgageCalc_purchasePrice",
+                                JSON.stringify(value)
+                              );
+                            }
+                          }
+                        }}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-right"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="slider-container">
+                  <label htmlFor="down-payment" className="slider-label">
+                    Down Payment
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-grow">
+                      <input
+                        type="range"
+                        id="down-payment"
+                        min="0"
+                        max={purchasePrice}
+                        step="1000"
+                        value={downPayment}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          setDownPayment(value);
+                          if (typeof localStorage !== "undefined") {
+                            localStorage.setItem(
+                              "mortgageCalc_downPayment",
+                              JSON.stringify(value)
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="w-32">
+                      <input
+                        type="text"
+                        value={`$${downPayment.toLocaleString()}`}
+                        onChange={(e) => {
+                          const value = parseInt(
+                            e.target.value.replace(/[$,]/g, ""),
+                            10
+                          );
+                          if (!isNaN(value)) {
+                            setDownPayment(value);
+                            if (typeof localStorage !== "undefined") {
+                              localStorage.setItem(
+                                "mortgageCalc_downPayment",
+                                JSON.stringify(value)
+                              );
+                            }
+                          }
+                        }}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-right"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="slider-container">
+                  <label htmlFor="interest-rate" className="slider-label">
+                    Interest Rate
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-grow">
+                      <input
+                        type="range"
+                        id="interest-rate"
+                        min="0"
+                        max="10"
+                        step="0.1"
+                        value={interestRate}
+                        onChange={(e) => {
+                          const value = parseFloat(e.target.value);
+                          setInterestRate(value);
+                          if (typeof localStorage !== "undefined") {
+                            localStorage.setItem(
+                              "mortgageCalc_interestRate",
+                              JSON.stringify(value)
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="w-32">
+                      <input
+                        type="text"
+                        value={`${interestRate.toFixed(2)}%`}
+                        onChange={(e) => {
+                          const value = parseFloat(
+                            e.target.value.replace(/%/g, "")
+                          );
+                          if (!isNaN(value)) {
+                            setInterestRate(value);
+                            if (typeof localStorage !== "undefined") {
+                              localStorage.setItem(
+                                "mortgageCalc_interestRate",
+                                JSON.stringify(value)
+                              );
+                            }
+                          }
+                        }}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-right"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                <div className="slider-container">
+                  <label htmlFor="gross-income" className="slider-label">
+                    Gross Annual Income
+                  </label>
+                  <div className="flex items-center space-x-4">
+                    <div className="flex-grow">
+                      <input
+                        type="range"
+                        id="gross-income"
+                        min="20000"
+                        max="500000"
+                        step="1000"
+                        value={grossIncome}
+                        onChange={(e) => {
+                          const value = parseInt(e.target.value, 10);
+                          setGrossIncome(value);
+                          if (typeof localStorage !== "undefined") {
+                            localStorage.setItem(
+                              "mortgageCalc_grossIncome",
+                              JSON.stringify(value)
+                            );
+                          }
+                        }}
+                      />
+                    </div>
+                    <div className="w-32">
+                      <input
+                        type="text"
+                        value={`$${grossIncome.toLocaleString()}`}
+                        onChange={(e) => {
+                          const value = parseInt(
+                            e.target.value.replace(/[$,]/g, ""),
+                            10
+                          );
+                          if (!isNaN(value)) {
+                            setGrossIncome(value);
+                            if (typeof localStorage !== "undefined") {
+                              localStorage.setItem(
+                                "mortgageCalc_grossIncome",
+                                JSON.stringify(value)
+                              );
+                            }
+                          }
+                        }}
+                        className="w-full px-2 py-1 border border-gray-300 rounded text-right"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column - Results */}
+              <div className="results-container">
+                <div id="payment-info">
+                  <h2>Monthly Payment</h2>
+                  <p id="monthly-payment">${monthlyPayment.toFixed(2)}</p>
+
+                  {/* Key-value display */}
+                  <div className="grid grid-cols-2 gap-2 mt-4">
+                    <div className="text-gray-600">Loan Amount:</div>
+                    <div className="text-right font-semibold">
+                      ${loanAmount.toLocaleString()}
+                    </div>
+
+                    <div className="text-gray-600">Income Multiple:</div>
+                    <div className="text-right font-semibold">
+                      {loanIncomeMultiple}x
+                    </div>
+
+                    <div className="text-gray-600">Payment % of Income:</div>
+                    <div className="text-right font-semibold">
+                      {paymentPercentage}%
+                    </div>
+
+                    <div className="text-gray-600">Total Interest Paid:</div>
+                    <div className="text-right font-semibold">
+                      $
+                      {amortizationSchedule
+                        .reduce((sum, year) => sum + year.interestPaid, 0)
+                        .toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                    </div>
+
+                    <div className="text-gray-600">Total Amount Paid:</div>
+                    <div className="text-right font-semibold">
+                      $
+                      {(
+                        downPayment +
+                        amortizationSchedule.reduce(
+                          (sum, year) => sum + year.totalPaid,
+                          0
+                        )
+                      ).toLocaleString(undefined, { maximumFractionDigits: 2 })}
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
 
-            <div className="slider-container">
-              <label htmlFor="down-payment" className="slider-label">
-                Down Payment: ${downPayment.toLocaleString()}
-              </label>
-              <input
-                type="range"
-                id="down-payment"
-                min="0"
-                max={purchasePrice}
-                step="1000"
-                value={downPayment}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  setDownPayment(value);
-                  if (typeof localStorage !== "undefined") {
-                    localStorage.setItem(
-                      "mortgageCalc_downPayment",
-                      JSON.stringify(value)
-                    );
-                  }
-                }}
-              />
+            {/* Full-width sections below both columns */}
+            <div className="mt-8">
+              <AmortizationChart />
             </div>
 
-            <div className="slider-container">
-              <label htmlFor="interest-rate" className="slider-label">
-                Interest Rate: {interestRate.toFixed(2)}%
-              </label>
-              <input
-                type="range"
-                id="interest-rate"
-                min="0"
-                max="10"
-                step="0.1"
-                value={interestRate}
-                onChange={(e) => {
-                  const value = parseFloat(e.target.value);
-                  setInterestRate(value);
-                  if (typeof localStorage !== "undefined") {
-                    localStorage.setItem(
-                      "mortgageCalc_interestRate",
-                      JSON.stringify(value)
-                    );
-                  }
-                }}
-              />
-            </div>
-
-            <div className="slider-container">
-              <label htmlFor="gross-income" className="slider-label">
-                Gross Annual Income: ${grossIncome.toLocaleString()}
-              </label>
-              <input
-                type="range"
-                id="gross-income"
-                min="20000"
-                max="500000"
-                step="1000"
-                value={grossIncome}
-                onChange={(e) => {
-                  const value = parseInt(e.target.value, 10);
-                  setGrossIncome(value);
-                  if (typeof localStorage !== "undefined") {
-                    localStorage.setItem(
-                      "mortgageCalc_grossIncome",
-                      JSON.stringify(value)
-                    );
-                  }
-                }}
-              />
-            </div>
-
-            <div id="payment-info">
-              <h2>Monthly Payment</h2>
-              <p id="monthly-payment">${monthlyPayment.toFixed(2)}</p>
-              <p id="breakdown">
-                This payment does not include taxes or insurance. Your loan
-                amount is ${loanAmount.toLocaleString()}. That's{" "}
-                {loanIncomeMultiple} times your gross annual income. Your
-                monthly payment is {paymentPercentage}% of your gross monthly
-                income.
-              </p>
-            </div>
-            <AmortizationChart />
             {amortizationSchedule.length > 0 && (
-              <>
-                <div className="flex items-center justify-between mt-6 mb-2">
+              <div className="mt-8">
+                <div className="flex items-center justify-between mb-2">
                   <h2 className="text-xl font-semibold text-gray-700">
                     Amortization Schedule
                   </h2>
@@ -656,7 +806,7 @@
                     })}
                   </tbody>
                 </table>
-              </>
+              </div>
             )}
           </div>
         );
