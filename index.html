@@ -207,6 +207,7 @@
           []
         );
         const [chartData, setChartData] = React.useState([]);
+        const [isCumulativeView, setIsCumulativeView] = React.useState(false);
 
         const calculateMonthlyPayment = () => {
           const principal = purchasePrice - downPayment;
@@ -534,55 +535,128 @@
             </div>
             <AmortizationChart />
             {amortizationSchedule.length > 0 && (
-              <table id="amortization-table">
-                <thead>
-                  <tr>
-                    <th>Year</th>
-                    <th>Principal Paid</th>
-                    <th>Interest Paid</th>
-                    <th>Total Paid</th>
-                    <th>Remaining Principal</th>
-                    <th>Equity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {amortizationSchedule.map((yearData, index) => (
-                    <tr key={index}>
-                      <td>{yearData.year}</td>
-                      <td style={{ textAlign: "right" }}>
-                        $
-                        {yearData.principalPaid.toLocaleString(undefined, {
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        $
-                        {yearData.interestPaid.toLocaleString(undefined, {
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        $
-                        {yearData.totalPaid.toLocaleString(undefined, {
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        $
-                        {yearData.endOfYearPrincipal.toLocaleString(undefined, {
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
-                      <td style={{ textAlign: "right" }}>
-                        $
-                        {yearData.equity.toLocaleString(undefined, {
-                          maximumFractionDigits: 2,
-                        })}
-                      </td>
+              <>
+                <div className="flex items-center justify-between mt-6 mb-2">
+                  <h2 className="text-xl font-semibold text-gray-700">
+                    Amortization Schedule
+                  </h2>
+                  <div className="flex items-center">
+                    <span
+                      className={`mr-2 text-sm ${
+                        !isCumulativeView
+                          ? "font-semibold text-gray-800"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      Annual
+                    </span>
+                    <div
+                      className="relative inline-block w-12 h-6 cursor-pointer"
+                      onClick={() => setIsCumulativeView(!isCumulativeView)}
+                    >
+                      <div
+                        className={`w-12 h-6 rounded-full transition-colors duration-200 ease-in-out ${
+                          isCumulativeView ? "bg-blue-500" : "bg-gray-300"
+                        }`}
+                      ></div>
+                      <div
+                        className={`absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 ease-in-out ${
+                          isCumulativeView ? "transform translate-x-6" : ""
+                        }`}
+                      ></div>
+                    </div>
+                    <span
+                      className={`ml-2 text-sm ${
+                        isCumulativeView
+                          ? "font-semibold text-gray-800"
+                          : "text-gray-500"
+                      }`}
+                    >
+                      Cumulative
+                    </span>
+                  </div>
+                </div>
+                <table id="amortization-table">
+                  <thead>
+                    <tr>
+                      <th>Year</th>
+                      <th>Principal Paid</th>
+                      <th>Interest Paid</th>
+                      <th>Total Paid</th>
+                      <th>Remaining Principal</th>
+                      <th>Equity</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {amortizationSchedule.map((yearData, index) => {
+                      // Calculate cumulative values if needed
+                      let cumulativePrincipalPaid = 0;
+                      let cumulativeInterestPaid = 0;
+                      let cumulativeTotalPaid = 0;
+
+                      if (isCumulativeView) {
+                        // Sum up all values up to and including the current year
+                        for (let i = 0; i <= index; i++) {
+                          cumulativePrincipalPaid +=
+                            amortizationSchedule[i].principalPaid;
+                          cumulativeInterestPaid +=
+                            amortizationSchedule[i].interestPaid;
+                          cumulativeTotalPaid +=
+                            amortizationSchedule[i].totalPaid;
+                        }
+                      }
+
+                      return (
+                        <tr key={index}>
+                          <td>{yearData.year}</td>
+                          <td style={{ textAlign: "right" }}>
+                            $
+                            {(isCumulativeView
+                              ? cumulativePrincipalPaid
+                              : yearData.principalPaid
+                            ).toLocaleString(undefined, {
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            $
+                            {(isCumulativeView
+                              ? cumulativeInterestPaid
+                              : yearData.interestPaid
+                            ).toLocaleString(undefined, {
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            $
+                            {(isCumulativeView
+                              ? cumulativeTotalPaid
+                              : yearData.totalPaid
+                            ).toLocaleString(undefined, {
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            $
+                            {yearData.endOfYearPrincipal.toLocaleString(
+                              undefined,
+                              {
+                                maximumFractionDigits: 2,
+                              }
+                            )}
+                          </td>
+                          <td style={{ textAlign: "right" }}>
+                            $
+                            {yearData.equity.toLocaleString(undefined, {
+                              maximumFractionDigits: 2,
+                            })}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </>
             )}
           </div>
         );
