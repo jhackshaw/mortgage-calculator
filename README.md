@@ -21,7 +21,17 @@ A simple, interactive mortgage calculator that helps users estimate monthly paym
 
 ## Usage
 
-Simply open the `index.html` file in your web browser or visit the GitHub Pages deployment at [https://[your-username].github.io/mortgage-calculator/](https://[your-username].github.io/mortgage-calculator/)
+Simply open the `index.html` file in your web browser or visit the GitHub Pages deployment at [https://your-username.github.io/mortgage-calculator/](https://your-username.github.io/mortgage-calculator/)
+
+## Deployment
+
+This project is configured to automatically deploy to GitHub Pages using GitHub Actions. To enable GitHub Pages for this repository:
+
+1. Go to your repository on GitHub
+2. Click on "Settings"
+3. Navigate to "Pages" in the left sidebar
+4. Under "Build and deployment", select "GitHub Actions" as the source
+5. The site will be automatically deployed when changes are pushed to the main branch
 
 ## License
 

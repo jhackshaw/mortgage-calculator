@@ -178,11 +178,30 @@
     <div id="root"></div>
     <script type="text/babel">
       const MortgageCalculator = () => {
-        const [purchasePrice, setPurchasePrice] = React.useState(1200000);
-        const [downPayment, setDownPayment] = React.useState(275000);
-        const [interestRate, setInterestRate] = React.useState(6.5);
+        // Helper function to get value from localStorage with fallback
+        const getStoredValue = (key, defaultValue) => {
+          if (typeof localStorage !== "undefined") {
+            const storedValue = localStorage.getItem(key);
+            return storedValue !== null
+              ? JSON.parse(storedValue)
+              : defaultValue;
+          }
+          return defaultValue;
+        };
+
+        const [purchasePrice, setPurchasePrice] = React.useState(() =>
+          getStoredValue("mortgageCalc_purchasePrice", 700000)
+        );
+        const [downPayment, setDownPayment] = React.useState(() =>
+          getStoredValue("mortgageCalc_downPayment", 140000)
+        );
+        const [interestRate, setInterestRate] = React.useState(() =>
+          getStoredValue("mortgageCalc_interestRate", 6.5)
+        );
         const [monthlyPayment, setMonthlyPayment] = React.useState(0);
-        const [grossIncome, setGrossIncome] = React.useState(250000);
+        const [grossIncome, setGrossIncome] = React.useState(() =>
+          getStoredValue("mortgageCalc_grossIncome", 100000)
+        );
         const [loanAmount, setLoanAmount] = React.useState(0);
         const [amortizationSchedule, setAmortizationSchedule] = React.useState(
           []
@@ -417,7 +436,16 @@
                 max="1800000"
                 step="1000"
                 value={purchasePrice}
-                onChange={(e) => setPurchasePrice(parseInt(e.target.value, 10))}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  setPurchasePrice(value);
+                  if (typeof localStorage !== "undefined") {
+                    localStorage.setItem(
+                      "mortgageCalc_purchasePrice",
+                      JSON.stringify(value)
+                    );
+                  }
+                }}
               />
             </div>
 
@@ -432,7 +460,16 @@
                 max={purchasePrice}
                 step="1000"
                 value={downPayment}
-                onChange={(e) => setDownPayment(parseInt(e.target.value, 10))}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  setDownPayment(value);
+                  if (typeof localStorage !== "undefined") {
+                    localStorage.setItem(
+                      "mortgageCalc_downPayment",
+                      JSON.stringify(value)
+                    );
+                  }
+                }}
               />
             </div>
 
@@ -447,7 +484,16 @@
                 max="10"
                 step="0.1"
                 value={interestRate}
-                onChange={(e) => setInterestRate(parseFloat(e.target.value))}
+                onChange={(e) => {
+                  const value = parseFloat(e.target.value);
+                  setInterestRate(value);
+                  if (typeof localStorage !== "undefined") {
+                    localStorage.setItem(
+                      "mortgageCalc_interestRate",
+                      JSON.stringify(value)
+                    );
+                  }
+                }}
               />
             </div>
 
@@ -462,7 +508,16 @@
                 max="500000"
                 step="1000"
                 value={grossIncome}
-                onChange={(e) => setGrossIncome(parseInt(e.target.value, 10))}
+                onChange={(e) => {
+                  const value = parseInt(e.target.value, 10);
+                  setGrossIncome(value);
+                  if (typeof localStorage !== "undefined") {
+                    localStorage.setItem(
+                      "mortgageCalc_grossIncome",
+                      JSON.stringify(value)
+                    );
+                  }
+                }}
               />
             </div>
 
