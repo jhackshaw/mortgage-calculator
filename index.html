@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width-device-width, initial-scale=1.0" />
+    <title>Mortgage Calculator</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      src="https://unpkg.com/react@18/umd/react.development.js"
+      crossorigin
+    ></script>
+    <script
+      src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"
+      crossorigin
+    ></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+    <style>
+      body {
+        font-family: "Inter", sans-serif;
+      }
+      .slider-container {
+        margin-bottom: 24px; /* Increased spacing */
+      }
+      .slider-label {
+        margin-bottom: 8px; /* Increased spacing */
+        display: block;
+        color: #4b5563; /* Tailwind gray-700 */
+        font-weight: 600;
+        font-size: 1.125rem; /* text-lg */
+      }
+      input[type="range"] {
+        -webkit-appearance: none;
+        width: 100%;
+        height: 6px; /* Increased height for better visibility */
+        border-radius: 5px;
+        background: #e5e7eb; /* Tailwind gray-200 */
+        outline: none;
+        -webkit-transition: 0.2s;
+        transition: opacity 0.2s;
+      }
+      input[type="range"]::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        appearance: none;
+        width: 16px; /* Increased size */
+        height: 16px; /* Increased size */
+        border-radius: 50%;
+        background: #6b7280; /* Tailwind gray-500 */
+        cursor: pointer;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px -1px rgba(0, 0, 0, 0.1); /* Tailwind shadow-sm */
+      }
+      input[type="range"]::-moz-range-thumb {
+        width: 16px; /* Increased size */
+        height: 16px; /* Increased size */
+        border-radius: 50%;
+        background: #6b7280; /* Tailwind gray-500 */
+        cursor: pointer;
+        box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1),
+          0 1px 2px -1px rgba(0, 0, 0, 0.1); /* Tailwind shadow-sm */
+        border: none; /* Remove default border */
+      }
+      input[type="range"]:focus::-webkit-slider-thumb {
+        box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.3); /* Tailwind gray-500 with opacity */
+      }
+      input[type="range"]:focus::-moz-range-thumb {
+        box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.3); /* Tailwind gray-500 with opacity */
+      }
+      .slider-value {
+        color: #6b7280; /* Tailwind gray-500 */
+        font-size: 1.125rem; /* text-lg */
+        font-weight: 600;
+        margin-top: 8px; /* Increased spacing */
+      }
+      #payment-info {
+        background-color: #f3f4f6; /* Tailwind gray-100 */
+        padding: 16px; /* Tailwind p-4 */
+        border-radius: 12px; /* Tailwind rounded-lg */
+        margin-top: 24px; /* Tailwind mt-6 */
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1); /* Tailwind shadow-md */
+        border: 1px solid #e0e0e0; /* Tailwind border-gray-300 */
+      }
+      #payment-info h2 {
+        font-size: 1.5rem; /* text-2xl */
+        font-weight: 600; /* font-semibold */
+        color: #4b5563; /* Tailwind gray-700 */
+        margin-bottom: 16px; /* Tailwind mb-4 */
+      }
+      #monthly-payment {
+        font-size: 2.25rem; /* text-3xl */
+        font-weight: 700; /* font-bold */
+        color: #1e293b; /* Tailwind gray-900 */
+        margin-bottom: 0;
+      }
+      #breakdown {
+        margin-top: 16px; /* Tailwind mt-4 */
+        font-size: 1.125rem; /* text-lg */
+        color: #6b7280; /* Tailwind gray-500 */
+      }
+      #chart-container {
+        width: 100%;
+        height: 300px;
+        margin-top: 24px; /* Tailwind mt-6 */
+        border: 1px solid #e0e0e0; /* Tailwind border-gray-300 */
+        border-radius: 12px; /* Tailwind rounded-lg */
+        padding: 16px;
+        background-color: white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1); /* Tailwind shadow-md */
+      }
+      .tooltip {
+        position: absolute;
+        display: none;
+        padding: 8px;
+        background-color: #ffffff;
+        border: 1px solid #e0e0e0;
+        border-radius: 4px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        font-size: 0.875rem;
+        color: #1f2937;
+        pointer-events: none;
+        z-index: 10;
+      }
+      #interest-rate-history-chart {
+        width: 100%;
+        height: 300px;
+        margin-top: 24px; /* Tailwind mt-6 */
+        border: 1px solid #e0e0e0; /* Tailwind border-gray-300 */
+        border-radius: 12px; /* Tailwind rounded-lg */
+        padding: 16px;
+        background-color: white;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1); /* Tailwind shadow-md */
+      }
+      #amortization-table {
+        margin-top: 24px;
+        width: 100%;
+        border-collapse: collapse;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+          0 2px 4px -2px rgba(0, 0, 0, 0.1);
+      }
+      #amortization-table thead tr {
+        background-color: #f7fafc;
+        color: #4b5563;
+        font-size: 0.875rem;
+        font-weight: 600;
+        text-align: left;
+      }
+      #amortization-table th,
+      #amortization-table td {
+        padding: 12px;
+        border-bottom: 1px solid #e0e0e0;
+      }
+      #amortization-table tbody tr:last-child td {
+        border-bottom: none;
+      }
+      #amortization-table tbody tr {
+        font-size: 1rem;
+        color: #6b7280;
+      }
+      #amortization-table tbody tr:nth-child(odd) {
+        background-color: #f3f4f6;
+      }
+      #amortization-table th {
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-100 p-8">
+    <div id="root"></div>
+    <script type="text/babel">
+      const MortgageCalculator = () => {
+        const [purchasePrice, setPurchasePrice] = React.useState(1200000);
+        const [downPayment, setDownPayment] = React.useState(275000);
+        const [interestRate, setInterestRate] = React.useState(6.5);
+        const [monthlyPayment, setMonthlyPayment] = React.useState(0);
+        const [grossIncome, setGrossIncome] = React.useState(250000);
+        const [loanAmount, setLoanAmount] = React.useState(0);
+        const [amortizationSchedule, setAmortizationSchedule] = React.useState(
+          []
+        );
+        const [chartData, setChartData] = React.useState([]);
+
+        const calculateMonthlyPayment = () => {
+          const principal = purchasePrice - downPayment;
+          setLoanAmount(principal);
+          const monthlyInterestRate = interestRate / 100 / 12;
+          const numberOfPayments = 30 * 12;
+
+          if (monthlyInterestRate === 0) {
+            setMonthlyPayment(principal / numberOfPayments);
+            return;
+          }
+
+          const numerator =
+            principal *
+            monthlyInterestRate *
+            Math.pow(1 + monthlyInterestRate, numberOfPayments);
+          const denominator =
+            Math.pow(1 + monthlyInterestRate, numberOfPayments) - 1;
+          const payment = numerator / denominator;
+
+          setMonthlyPayment(payment);
+        };
+
+        React.useEffect(() => {
+          calculateMonthlyPayment();
+        }, [purchasePrice, downPayment, interestRate, grossIncome]);
+
+        const generateAmortizationSchedule = () => {
+          const principal = purchasePrice - downPayment;
+          const monthlyInterestRate = interestRate / 100 / 12;
+          const numberOfPayments = 30 * 12;
+          let remainingPrincipal = principal;
+          const schedule = [];
+          let yearlySchedule = [];
+          let year = 1;
+          let totalPrincipalPaidYear = 0;
+          let totalInterestPaidYear = 0;
+          let totalEquity = downPayment;
+
+          for (let i = 0; i < numberOfPayments; i++) {
+            const interestPayment = remainingPrincipal * monthlyInterestRate;
+            const principalPayment = monthlyPayment - interestPayment;
+            remainingPrincipal -= principalPayment;
+
+            totalPrincipalPaidYear += principalPayment;
+            totalInterestPaidYear += interestPayment;
+
+            if ((i + 1) % 12 === 0) {
+              totalEquity += totalPrincipalPaidYear;
+              yearlySchedule.push({
+                year: year,
+                principalPaid: totalPrincipalPaidYear,
+                interestPaid: totalInterestPaidYear,
+                totalPaid: totalPrincipalPaidYear + totalInterestPaidYear,
+                remainingPrincipal:
+                  remainingPrincipal > 0 ? remainingPrincipal : 0,
+                endOfYearPrincipal: remainingPrincipal,
+                equity: totalEquity,
+              });
+              year++;
+              totalPrincipalPaidYear = 0;
+              totalInterestPaidYear = 0;
+            }
+            schedule.push({
+              month: i + 1,
+              interest: interestPayment,
+              principal: principalPayment,
+            });
+          }
+          if (remainingPrincipal > 0) {
+            totalEquity += totalPrincipalPaidYear;
+            yearlySchedule.push({
+              year: year,
+              principalPaid: totalPrincipalPaidYear,
+              interestPaid: totalInterestPaidYear,
+              totalPaid: totalPrincipalPaidYear + totalInterestPaidYear,
+              remainingPrincipal:
+                remainingPrincipal > 0 ? remainingPrincipal : 0,
+              endOfYearPrincipal: remainingPrincipal,
+              equity: totalEquity,
+            });
+          }
+          setAmortizationSchedule(yearlySchedule);
+
+          const yearlyData = [];
+          for (let i = 11; i < schedule.length; i += 12) {
+            yearlyData.push(schedule[i]);
+          }
+          setChartData(yearlyData);
+          return schedule;
+        };
+
+        React.useEffect(() => {
+          generateAmortizationSchedule();
+        }, [monthlyPayment, purchasePrice, downPayment, interestRate]);
+
+        const AmortizationChart = () => {
+          const containerRef = React.useRef(null);
+
+          React.useEffect(() => {
+            const container = containerRef.current;
+            if (!container || !chartData.length) return;
+
+            const width = container.offsetWidth;
+            const height = container.offsetHeight;
+            const margin = { top: 50, right: 30, bottom: 80, left: 60 }; // Increased bottom margin for rotated labels
+            const innerWidth = width - margin.left - margin.right;
+            const innerHeight = height - margin.top - margin.bottom;
+
+            const svg = d3.select(container).select("svg");
+            svg.selectAll("*").remove();
+
+            const chartSvg = svg
+              .attr("width", width)
+              .attr("height", height)
+              .append("g")
+              .attr("transform", `translate(${margin.left},${margin.top})`);
+
+            const x = d3
+              .scaleBand()
+              .domain(chartData.map((_, index) => `Year ${index + 1}`))
+              .range([0, innerWidth])
+              .padding(0.1);
+
+            const y = d3
+              .scaleLinear()
+              .domain([0, d3.max(chartData, (d) => d.interest + d.principal)])
+              .range([innerHeight, 0]);
+
+            const xAxis = d3.axisBottom(x);
+            const yAxis = d3.axisLeft(y).tickFormat(d3.format(".2s"));
+
+            chartSvg
+              .append("g")
+              .attr("transform", `translate(0,${innerHeight})`)
+              .call(xAxis)
+              .selectAll("text")
+              .style("font-size", "0.8rem")
+              .style("text-anchor", "end") // Rotate labels
+              .attr("dx", "-0.8em")
+              .attr("dy", "0.15em")
+              .attr("transform", "rotate(-65)");
+
+            chartSvg
+              .append("g")
+              .call(yAxis)
+              .selectAll("text")
+              .style("font-size", "0.8rem");
+
+            const stack = d3.stack().keys(["interest", "principal"])(chartData);
+
+            const colorScale = d3
+              .scaleOrdinal()
+              .domain(["interest", "principal"])
+              .range(["#e53e3e", "#38a169"]);
+
+            chartSvg
+              .selectAll(".bar")
+              .data(stack)
+              .enter()
+              .append("g")
+              .attr("fill", (d) => colorScale(d.key))
+              .selectAll("rect")
+              .data((d) => d)
+              .enter()
+              .append("rect")
+              .attr("x", (d, i) => x(`Year ${i + 1}`))
+              .attr("y", (d) => y(d[1]))
+              .attr("height", (d) => y(d[0]) - y(d[1]))
+              .attr("width", x.bandwidth());
+
+            // Add title to the chart
+            chartSvg
+              .append("text")
+              .attr("x", innerWidth / 2)
+              .attr("y", -30)
+              .attr("text-anchor", "middle")
+              .style("font-size", "1rem")
+              .style("font-weight", "bold")
+              .text("Amortization Chart");
+
+            // Add y-axis label
+            chartSvg
+              .append("text")
+              .attr("transform", "rotate(-90)")
+              .attr("y", -50)
+              .attr("x", -innerHeight / 2)
+              .attr("dy", "1em")
+              .style("text-anchor", "middle")
+              .style("font-size", "0.9rem")
+              .text("Amount ($)");
+          }, [
+            chartData,
+            monthlyPayment,
+            purchasePrice,
+            downPayment,
+            interestRate,
+          ]);
+
+          return (
+            <div ref={containerRef} id="chart-container">
+              <svg></svg>
+            </div>
+          );
+        };
+
+        const paymentPercentage = (
+          (monthlyPayment / (grossIncome / 12)) *
+          100
+        ).toFixed(2);
+        const loanIncomeMultiple = (loanAmount / grossIncome).toFixed(2);
+
+        return (
+          <div className="max-w-3xl mx-auto">
+            <h1 className="text-3xl font-bold text-gray-900 mb-8 text-center">
+              Mortgage Calculator
+            </h1>
+
+            <div className="slider-container">
+              <label htmlFor="purchase-price" className="slider-label">
+                Purchase Price: ${purchasePrice.toLocaleString()}
+              </label>
+              <input
+                type="range"
+                id="purchase-price"
+                min="100000"
+                max="1800000"
+                step="1000"
+                value={purchasePrice}
+                onChange={(e) => setPurchasePrice(parseInt(e.target.value, 10))}
+              />
+            </div>
+
+            <div className="slider-container">
+              <label htmlFor="down-payment" className="slider-label">
+                Down Payment: ${downPayment.toLocaleString()}
+              </label>
+              <input
+                type="range"
+                id="down-payment"
+                min="0"
+                max={purchasePrice}
+                step="1000"
+                value={downPayment}
+                onChange={(e) => setDownPayment(parseInt(e.target.value, 10))}
+              />
+            </div>
+
+            <div className="slider-container">
+              <label htmlFor="interest-rate" className="slider-label">
+                Interest Rate: {interestRate.toFixed(2)}%
+              </label>
+              <input
+                type="range"
+                id="interest-rate"
+                min="0"
+                max="10"
+                step="0.1"
+                value={interestRate}
+                onChange={(e) => setInterestRate(parseFloat(e.target.value))}
+              />
+            </div>
+
+            <div className="slider-container">
+              <label htmlFor="gross-income" className="slider-label">
+                Gross Annual Income: ${grossIncome.toLocaleString()}
+              </label>
+              <input
+                type="range"
+                id="gross-income"
+                min="20000"
+                max="500000"
+                step="1000"
+                value={grossIncome}
+                onChange={(e) => setGrossIncome(parseInt(e.target.value, 10))}
+              />
+            </div>
+
+            <div id="payment-info">
+              <h2>Monthly Payment</h2>
+              <p id="monthly-payment">${monthlyPayment.toFixed(2)}</p>
+              <p id="breakdown">
+                This payment does not include taxes or insurance. Your loan
+                amount is ${loanAmount.toLocaleString()}. That's{" "}
+                {loanIncomeMultiple} times your gross annual income. Your
+                monthly payment is {paymentPercentage}% of your gross monthly
+                income.
+              </p>
+            </div>
+            <AmortizationChart />
+            {amortizationSchedule.length > 0 && (
+              <table id="amortization-table">
+                <thead>
+                  <tr>
+                    <th>Year</th>
+                    <th>Principal Paid</th>
+                    <th>Interest Paid</th>
+                    <th>Total Paid</th>
+                    <th>Remaining Principal</th>
+                    <th>Equity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {amortizationSchedule.map((yearData, index) => (
+                    <tr key={index}>
+                      <td>{yearData.year}</td>
+                      <td style={{ textAlign: "right" }}>
+                        $
+                        {yearData.principalPaid.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        $
+                        {yearData.interestPaid.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        $
+                        {yearData.totalPaid.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        $
+                        {yearData.endOfYearPrincipal.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                      <td style={{ textAlign: "right" }}>
+                        $
+                        {yearData.equity.toLocaleString(undefined, {
+                          maximumFractionDigits: 2,
+                        })}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+        );
+      };
+
+      const rootElement = document.getElementById("root");
+      const root = ReactDOM.createRoot(rootElement);
+      root.render(<MortgageCalculator />);
+    </script>
+  </body>
+</html>
